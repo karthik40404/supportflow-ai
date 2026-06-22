@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block title %}Team Lead Dashboard - SupportFlow AI{% endblock %}
+{% block page_title %}Operations Dashboard{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Operations Overview</h4>
+        <p class="text-muted mb-0">Real-time support ticket analytics</p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if escalation > 0 %}
+        <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-exclamation-triangle me-1"></i>{{ escalation }} Escalations</span>
+        {% endif %}
+        <a href="{% url 'tickets:create' %}" class="btn btn-primary"><i class="bi bi-plus me-1"></i>New Ticket</a>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#4F46E5,#6366F1);">
+            <div class="stat-icon"><i class="bi bi-inbox"></i></div>
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-label">Total Tickets</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#3B82F6,#60A5FA);">
+            <div class="stat-icon"><i class="bi bi-folder2-open"></i></div>
+            <div class="stat-value">{{ open }}</div>
+            <div class="stat-label">Open</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#EF4444,#F87171);">
+            <div class="stat-icon"><i class="bi bi-fire"></i></div>
+            <div class="stat-value">{{ high_priority }}</div>
+            <div class="stat-label">High Priority</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#10B981,#34D399);">
+            <div class="stat-icon"><i class="bi bi-check2-all"></i></div>
+            <div class="stat-value">{{ resolved }}</div>
+            <div class="stat-label">Resolved</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 text-center border-warning">
+            <div class="fs-3 fw-bold text-warning">{{ unassigned }}</div>
+            <div class="small text-muted">Unassigned Tickets</div>
+            <a href="{% url 'tickets:list' %}?status=open" class="btn btn-sm btn-outline-warning mt-2">Assign Now</a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 text-center border-info">
+            <div class="fs-3 fw-bold text-info">{{ assigned_today }}</div>
+            <div class="small text-muted">Assigned Today</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 text-center border-danger">
+            <div class="fs-3 fw-bold text-danger">{{ escalation }}</div>
+            <div class="small text-muted">Needs Escalation</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 text-center border-success">
+            <div class="fs-3 fw-bold text-success">{{ employees|length }}</div>
+            <div class="small text-muted">Active Agents</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 h-100">
+            <h6 class="fw-semibold mb-3">Priority Distribution</h6>
+            <canvas id="priorityChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 h-100">
+            <h6 class="fw-semibold mb-3">Ticket Status</h6>
+            <canvas id="statusChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 h-100">
+            <h6 class="fw-semibold mb-3">Agent Workload</h6>
+            {% if employees %}
+            <div class="d-flex flex-column gap-2 mt-1">
+            {% for emp in employees %}
+            <div>
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>{{ emp.display_name }}</span>
+                    <strong>{{ emp.task_count }}</strong>
+                </div>
+                <div class="progress" style="height:6px;">
+                    <div class="progress-bar {% if emp.task_count > 5 %}bg-danger{% elif emp.task_count > 3 %}bg-warning{% else %}bg-success{% endif %}"
+                         style="width:{% widthratio emp.task_count 10 100 %}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted small">No employees assigned yet.</p>
+            {% endif %}
+            <a href="{% url 'assignments:workload' %}" class="btn btn-sm btn-outline-secondary mt-3 w-100">Full Workload View</a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Tickets Table -->
+<div class="card">
+    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+        <h6 class="fw-bold mb-0">Recent Tickets</h6>
+        <a href="{% url 'tickets:list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">#</th>
+                    <th>Title</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Sentiment</th>
+                    <th>Assigned</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in recent_tickets %}
+            <tr class="ticket-row" onclick="location.href='{% url 'tickets:detail' ticket.pk %}'">
+                <td class="ps-3 text-muted small">#{{ ticket.id }}</td>
+                <td>
+                    <div class="fw-medium">{{ ticket.title|truncatechars:40 }}</div>
+                    {% if ticket.escalation_required %}
+                    <span class="badge bg-danger" style="font-size:0.6rem;">⚠ Escalate</span>
+                    {% endif %}
+                </td>
+                <td class="small">{{ ticket.created_by.display_name }}</td>
+                <td><span class="badge bg-{{ ticket.status_badge }}">{{ ticket.get_status_display }}</span></td>
+                <td><span class="badge badge-priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></td>
+                <td>
+                    {% if ticket.sentiment %}
+                    <span class="sentiment-{{ ticket.sentiment }} small fw-medium">
+                        {% if ticket.sentiment == 'positive' %}😊{% elif ticket.sentiment == 'negative' %}😟{% elif ticket.sentiment == 'very_negative' %}😠{% else %}😐{% endif %}
+                        {{ ticket.get_sentiment_display }}
+                    </span>
+                    {% else %}<span class="text-muted small">—</span>{% endif %}
+                </td>
+                <td class="small">
+                    {% if ticket.assigned_to %}{{ ticket.assigned_to.display_name }}
+                    {% else %}<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Unassigned</span>{% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'assignments:assign' ticket.pk %}" class="btn btn-xs btn-sm btn-outline-primary py-0 px-2" onclick="event.stopPropagation()">
+                        <i class="bi bi-person-plus"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="text-center text-muted py-4">No tickets yet.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const priorityData = {{ priority_data|safe }};
+const statusData = {{ status_data|safe }};
+
+new Chart(document.getElementById('priorityChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Low','Medium','High','Critical'],
+        datasets: [{
+            data: [priorityData.low, priorityData.medium, priorityData.high, priorityData.critical],
+            backgroundColor: ['#10B981','#F59E0B','#EF4444','#1F2937'],
+            borderWidth: 0,
+        }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, cutout: '65%' }
+});
+
+new Chart(document.getElementById('statusChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Open','In Progress','Pending','Resolved'],
+        datasets: [{
+            data: [statusData.open, statusData.in_progress, statusData.pending, statusData.resolved],
+            backgroundColor: ['#6366F1','#06B6D4','#F59E0B','#10B981'],
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+    }
+});
+</script>
+{% endblock %}

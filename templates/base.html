@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SupportFlow AI{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    {% load static %}
+    <style>
+        :root {
+            --sf-primary: #4F46E5;
+            --sf-primary-light: #6366F1;
+            --sf-accent: #06B6D4;
+            --sf-dark: #1E1B4B;
+            --sf-success: #10B981;
+            --sf-warning: #F59E0B;
+            --sf-danger: #EF4444;
+            --sidebar-width: 260px;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #F8FAFC; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--sf-dark) 0%, #312E81 100%);
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-brand {
+            padding: 1.5rem 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-brand h5 { color: #fff; font-weight: 700; margin: 0; font-size: 1.1rem; }
+        .sidebar-brand small { color: rgba(255,255,255,0.5); font-size: 0.7rem; }
+        .sidebar-nav { padding: 1rem 0; }
+        .sidebar-section { padding: 0.5rem 1.25rem; font-size: 0.65rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+        .sidebar-link {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.65rem 1.25rem; color: rgba(255,255,255,0.75);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            transition: all 0.2s; border-radius: 0;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            color: #fff; background: rgba(255,255,255,0.12);
+            border-left: 3px solid var(--sf-accent);
+        }
+        .sidebar-link i { font-size: 1rem; width: 20px; }
+        
+        /* Main content */
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+        .topbar {
+            background: #fff; border-bottom: 1px solid #E2E8F0;
+            padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .page-content { padding: 1.5rem; }
+        
+        /* Cards */
+        .card { border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-card { border: none; border-radius: 16px; padding: 1.5rem; color: #fff; position: relative; overflow: hidden; }
+        .stat-card::after { content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .stat-card .stat-icon { font-size: 2rem; opacity: 0.8; }
+        .stat-card .stat-value { font-size: 2.2rem; font-weight: 800; }
+        .stat-card .stat-label { font-size: 0.8rem; opacity: 0.85; }
+        
+        /* Badges & Pills */
+        .badge-priority-low { background: #DCFCE7; color: #166534; }
+        .badge-priority-medium { background: #FEF9C3; color: #854D0E; }
+        .badge-priority-high { background: #FEE2E2; color: #991B1B; }
+        .badge-priority-critical { background: #1F2937; color: #F9FAFB; }
+        
+        /* Ticket row */
+        .ticket-row { transition: background 0.15s; cursor: pointer; }
+        .ticket-row:hover { background: #F8FAFC; }
+        
+        /* AI badge */
+        .ai-badge {
+            background: linear-gradient(135deg, #667EEA, #764BA2);
+            color: white; border-radius: 6px; padding: 0.2rem 0.5rem;
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+        }
+
+        /* AI insight card */
+        .ai-insight { background: linear-gradient(135deg, #EEF2FF, #F0FDFF); border: 1px solid #C7D2FE; border-radius: 12px; }
+        
+        /* Sentiment colors */
+        .sentiment-positive { color: var(--sf-success); }
+        .sentiment-negative { color: var(--sf-warning); }
+        .sentiment-very_negative { color: var(--sf-danger); }
+        .sentiment-neutral { color: #6B7280; }
+        
+        /* Auth pages */
+        .auth-wrapper { min-height: 100vh; background: linear-gradient(135deg, var(--sf-dark) 0%, #312E81 50%, #1E3A5F 100%); display: flex; align-items: center; }
+        .auth-card { border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center gap-2">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-lightning-charge-fill text-white"></i>
+            </div>
+            <div>
+                <h5>SupportFlow</h5>
+                <small>AI-Powered Support</small>
+            </div>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <div class="sidebar-section">Main</div>
+        <a href="{% url 'dashboard:home' %}" class="sidebar-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+        
+        {% if user.is_customer %}
+        <div class="sidebar-section">Support</div>
+        <a href="{% url 'tickets:create' %}" class="sidebar-link"><i class="bi bi-plus-circle"></i> New Ticket</a>
+        <a href="{% url 'tickets:list' %}" class="sidebar-link"><i class="bi bi-ticket-perforated"></i> My Tickets</a>
+        {% endif %}
+        
+        {% if user.is_employee %}
+        <div class="sidebar-section">Work</div>
+        <a href="{% url 'tickets:list' %}" class="sidebar-link"><i class="bi bi-list-task"></i> My Tasks</a>
+        {% endif %}
+        
+        {% if user.is_team_lead or user.is_admin %}
+        <div class="sidebar-section">Operations</div>
+        <a href="{% url 'tickets:list' %}" class="sidebar-link"><i class="bi bi-ticket-perforated"></i> All Tickets</a>
+        <a href="{% url 'assignments:workload' %}" class="sidebar-link"><i class="bi bi-people"></i> Workload</a>
+        {% endif %}
+        
+        {% if user.is_admin %}
+        <div class="sidebar-section">Admin</div>
+        <a href="{% url 'dashboard:users' %}" class="sidebar-link"><i class="bi bi-person-gear"></i> Users</a>
+        <a href="/admin/" class="sidebar-link"><i class="bi bi-shield-lock"></i> Admin Panel</a>
+        {% endif %}
+        
+        <div class="sidebar-section">Account</div>
+        <a href="{% url 'accounts:profile' %}" class="sidebar-link"><i class="bi bi-person-circle"></i> Profile</a>
+        <a href="{% url 'accounts:logout' %}" class="sidebar-link"><i class="bi bi-box-arrow-left"></i> Logout</a>
+    </div>
+    
+    <!-- User info at bottom -->
+    <div style="position:absolute;bottom:0;width:100%;padding:1rem;border-top:1px solid rgba(255,255,255,0.1);">
+        <div class="d-flex align-items-center gap-2">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;font-weight:700;">
+                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+            </div>
+            <div>
+                <div style="color:#fff;font-size:0.8rem;font-weight:600;">{{ user.display_name }}</div>
+                <div style="color:rgba(255,255,255,0.5);font-size:0.65rem;">{{ user.get_role_display }}</div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main -->
+<div class="main-content">
+    <div class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-outline-secondary d-md-none" onclick="document.getElementById('sidebar').classList.toggle('show')">
+                <i class="bi bi-list"></i>
+            </button>
+            <h6 class="mb-0 text-muted">{% block page_title %}Dashboard{% endblock %}</h6>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge" style="background:linear-gradient(135deg,#6366F1,#06B6D4);">
+                <i class="bi bi-lightning-charge-fill"></i> AI Active
+            </span>
+            <a href="{% url 'tickets:create' %}" class="btn btn-sm btn-primary d-none d-md-inline-flex align-items-center gap-1">
+                <i class="bi bi-plus"></i> New Ticket
+            </a>
+        </div>
+    </div>
+    
+    <div class="page-content">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - SupportFlow AI{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <h4 class="fw-bold mb-1">Hello, {{ user.first_name }}! 👋</h4>
+    <p class="text-muted">Track and manage your support requests below.</p>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#6366F1,#818CF8);">
+            <div class="stat-icon"><i class="bi bi-ticket-perforated"></i></div>
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-label">Total Tickets</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#3B82F6,#60A5FA);">
+            <div class="stat-icon"><i class="bi bi-circle"></i></div>
+            <div class="stat-value">{{ open }}</div>
+            <div class="stat-label">Open</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#F59E0B,#FCD34D);">
+            <div class="stat-icon"><i class="bi bi-gear"></i></div>
+            <div class="stat-value">{{ in_progress }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#10B981,#34D399);">
+            <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+            <div class="stat-value">{{ resolved }}</div>
+            <div class="stat-label">Resolved</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a href="{% url 'tickets:create' %}" class="card p-4 text-decoration-none h-100 d-flex flex-row align-items-center gap-3" style="border:2px dashed #C7D2FE;">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#6366F1,#818CF8);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-plus-circle text-white fs-5"></i>
+            </div>
+            <div>
+                <div class="fw-semibold text-primary">Create New Ticket</div>
+                <div class="small text-muted">Submit a support request</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'tickets:list' %}" class="card p-4 text-decoration-none h-100 d-flex flex-row align-items-center gap-3">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#3B82F6,#60A5FA);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-list-ul text-white fs-5"></i>
+            </div>
+            <div>
+                <div class="fw-semibold">View All Tickets</div>
+                <div class="small text-muted">See all your requests</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'accounts:profile' %}" class="card p-4 text-decoration-none h-100 d-flex flex-row align-items-center gap-3">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#10B981,#34D399);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-person-circle text-white fs-5"></i>
+            </div>
+            <div>
+                <div class="fw-semibold">Edit Profile</div>
+                <div class="small text-muted">Update your information</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Tickets -->
+<div class="card">
+    <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+        <h6 class="fw-bold mb-0">Recent Tickets</h6>
+        <a href="{% url 'tickets:list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">#</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>AI</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in recent_tickets %}
+            <tr class="ticket-row" onclick="location.href='{% url 'tickets:detail' ticket.pk %}'">
+                <td class="ps-3 text-muted small">#{{ ticket.id }}</td>
+                <td>
+                    <div class="fw-medium">{{ ticket.title|truncatechars:50 }}</div>
+                    {% if ticket.category %}<small class="text-muted">{{ ticket.get_category_display }}</small>{% endif %}
+                </td>
+                <td><span class="badge bg-{{ ticket.status_badge }}">{{ ticket.get_status_display }}</span></td>
+                <td>
+                    <span class="badge badge-priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+                </td>
+                <td>
+                    {% if ticket.ai_processed %}
+                    <span class="ai-badge">✨ AI</span>
+                    {% else %}<span class="text-muted small">—</span>{% endif %}
+                </td>
+                <td class="text-muted small">{{ ticket.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted py-4">No tickets yet. <a href="{% url 'tickets:create' %}">Create your first ticket</a></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

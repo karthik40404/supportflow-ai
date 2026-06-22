@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Create Ticket - SupportFlow AI{% endblock %}
+{% block page_title %}Create New Ticket{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:48px;height:48px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-plus-circle text-white fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Create Support Ticket</h5>
+                    <p class="text-muted small mb-0">Our AI will automatically analyze and categorize your request</p>
+                </div>
+            </div>
+
+            <!-- AI Features Hint -->
+            <div class="ai-insight p-3 mb-4 d-flex align-items-center gap-3">
+                <div style="font-size:1.5rem;">🤖</div>
+                <div>
+                    <div class="fw-semibold small" style="color:#4F46E5;">AI-Powered Analysis</div>
+                    <div class="small text-muted">Upon submission, our AI will automatically classify your ticket, predict priority, analyze sentiment, generate a summary, and suggest a solution.</div>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Issue Title <span class="text-danger">*</span></label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+                    <div class="form-text">Be specific. E.g., "Login fails after password reset" instead of "Login problem"</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>{% endif %}
+                    <div class="form-text">Include steps to reproduce, error messages, and what you expected to happen.</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Attachment (optional)</label>
+                    {{ form.attachment }}
+                    <div class="form-text">Upload screenshots or relevant files (max 10MB)</div>
+                </div>
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary px-4 py-2">
+                        <i class="bi bi-lightning-charge me-2"></i>Submit & Analyze with AI
+                    </button>
+                    <a href="{% url 'tickets:list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

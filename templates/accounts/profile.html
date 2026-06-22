@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Profile - SupportFlow AI{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card p-4 text-center">
+            <div style="width:80px;height:80px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:#fff;font-weight:700;">
+                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+            </div>
+            <h5 class="fw-bold">{{ user.display_name }}</h5>
+            <span class="badge bg-primary rounded-pill">{{ user.get_role_display }}</span>
+            {% if user.department %}<p class="text-muted small mt-2 mb-1"><i class="bi bi-building me-1"></i>{{ user.department }}</p>{% endif %}
+            <p class="text-muted small">{{ user.email }}</p>
+            {% if user.bio %}<p class="text-muted small border-top pt-3">{{ user.bio }}</p>{% endif %}
+            <div class="border-top pt-3 mt-2">
+                <small class="text-muted">Member since {{ user.date_joined|date:"M Y" }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-pencil-square me-2 text-primary"></i>Edit Profile</h6>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                {% for field in form %}
+                <div class="mb-3 {% if field.name in 'first_name,last_name,phone,department' %}col-md-6{% else %}col-12{% endif %}">
+                    <label class="form-label fw-medium small">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+                </div>
+                {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check2 me-1"></i>Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

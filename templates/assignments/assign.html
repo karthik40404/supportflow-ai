@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Assign Ticket - SupportFlow AI{% endblock %}
+{% block page_title %}Assign Ticket{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+            <h5 class="fw-bold mb-0">Assign Ticket #{{ ticket.id }}</h5>
+        </div>
+
+        <!-- Ticket Summary -->
+        <div class="card p-3 mb-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-semibold">{{ ticket.title }}</div>
+                    <small class="text-muted">{{ ticket.description|truncatechars:120 }}</small>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0 ms-3">
+                    <span class="badge badge-priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+                    <span class="badge bg-{{ ticket.status_badge }}">{{ ticket.get_status_display }}</span>
+                </div>
+            </div>
+            {% if ticket.ai_processed %}
+            <div class="mt-3 pt-3 border-top ai-insight p-2 rounded">
+                <span class="ai-badge me-2">AI Recommendation</span>
+                <small class="text-muted">Department: <strong>{{ ticket.get_suggested_department_display }}</strong></small>
+                {% if ticket.escalation_required %}
+                <span class="badge bg-danger ms-2">Escalation Required</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Employee Workload Overview -->
+        <div class="card p-4 mb-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-people me-2 text-primary"></i>Agent Availability</h6>
+            <div class="row g-2">
+            {% for emp in employees %}
+            <div class="col-md-6">
+                <div class="border rounded p-2 d-flex align-items-center gap-2">
+                    <div style="width:32px;height:32px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.7rem;font-weight:700;">
+                        {{ emp.first_name.0|upper }}{{ emp.last_name.0|upper }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="small fw-medium">{{ emp.display_name }}</div>
+                        <div class="small text-muted">{{ emp.department|default:"Support" }}</div>
+                    </div>
+                    <span class="badge {% if emp.active_tasks > 5 %}bg-danger{% elif emp.active_tasks > 3 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                        {{ emp.active_tasks }} active
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">No employees available.</p>
+            {% endfor %}
+            </div>
+        </div>
+
+        <!-- Assignment Form -->
+        <div class="card p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-person-plus me-2 text-primary"></i>Assignment Details</h6>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Assign To <span class="text-danger">*</span></label>
+                    {{ form.employee }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Deadline</label>
+                    {{ form.deadline }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Notes for Agent</label>
+                    {{ form.notes }}
+                </div>
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check2 me-2"></i>Assign Ticket
+                    </button>
+                    <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
