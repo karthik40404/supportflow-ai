@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegisterForm, LoginForm, ProfileForm
+from .forms import RegisterForm, LoginForm, ProfileForm , StaffCreateForm
 from .models import User
 
 def register_view(request):
@@ -40,3 +40,29 @@ def profile_view(request):
         messages.success(request, 'Profile updated successfully!')
         return redirect('accounts:profile')
     return render(request, 'accounts/profile.html', {'form': form})
+
+@login_required
+def create_staff(request):
+
+    if not request.user.is_admin:
+        return redirect('dashboard:home')
+
+    form = StaffCreateForm(request.POST or None)
+
+    if request.method == 'POST':
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Staff account created successfully."
+            )
+
+            return redirect('dashboard:users')
+
+    return render(
+        request,
+        'accounts/create_staff.html',
+        {'form': form}
+    )

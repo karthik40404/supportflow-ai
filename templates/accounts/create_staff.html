@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Staff{% endblock %}
+{% block page_title %}Create Staff{% endblock %}
+
+{% block extra_css %}
+<style>
+.staff-card {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.staff-header {
+    background: linear-gradient(
+        135deg,
+        #4F46E5,
+        #06B6D4
+    );
+    padding: 1.25rem;
+}
+
+.staff-header h4 {
+    color: white;
+    margin: 0;
+    font-weight: 700;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-control,
+.form-select {
+    border-radius: 10px;
+    padding: 0.75rem;
+    border: 1px solid #E2E8F0;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #6366F1;
+    box-shadow: 0 0 0 0.2rem rgba(99,102,241,.15);
+}
+
+.section-title {
+    color: #4F46E5;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.password-help {
+    background: #EEF2FF;
+    border-radius: 10px;
+    padding: 1rem;
+    color: #4F46E5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Add Staff Member
+                    </h4>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Username
+                                </label>
+                                {{ form.username }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Email
+                                </label>
+                                {{ form.email }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    First Name
+                                </label>
+                                {{ form.first_name }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Last Name
+                                </label>
+                                {{ form.last_name }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Department
+                                </label>
+                                {{ form.department }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Role
+                                </label>
+                                {{ form.role }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Password
+                                </label>
+                                {{ form.password1 }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    Confirm Password
+                                </label>
+                                {{ form.password2 }}
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a href="{% url 'dashboard:users' %}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+
+                            <button class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Create Staff
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,6 +1,10 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
 import dj_database_url
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-supportflow-ai-secret-key-change-in-production'
@@ -92,4 +96,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_API_KEY = os.environ.get(
+    'GEMINI_API_KEY',
+    ''
+)

@@ -146,7 +146,7 @@
         {% if user.is_admin %}
         <div class="sidebar-section">Admin</div>
         <a href="{% url 'dashboard:users' %}" class="sidebar-link"><i class="bi bi-person-gear"></i> Users</a>
-        <a href="/admin/" class="sidebar-link"><i class="bi bi-shield-lock"></i> Admin Panel</a>
+        <a href="{% url 'accounts:create_staff' %}"class="sidebar-link"><i class="bi bi-person-plus"></i>Add Staff</a>
         {% endif %}
         
         <div class="sidebar-section">Account</div>

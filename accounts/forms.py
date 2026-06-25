@@ -33,3 +33,34 @@ class ProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['bio'].widget = forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
         self.fields['avatar'].widget = forms.FileInput(attrs={'class': 'form-control'})
+
+class StaffCreateForm(UserCreationForm):
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'department',
+            'role',
+            'password1',
+            'password2'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['role'].choices = [
+            ('employee', 'Employee'),
+            ('team_lead', 'Team Lead'),
+        ]
+
+        self.fields['department'].choices = User.DEPARTMENT_CHOICES
+
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+
+        self.fields['role'].widget.attrs['class'] = 'form-select'
+        self.fields['department'].widget.attrs['class'] = 'form-select'
